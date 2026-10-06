@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:16
+    container_name: perpustakaan-db
+    environment:
+      POSTGRES_DB: perpustakaan
+      POSTGRES_USER: perpus
+      POSTGRES_PASSWORD: perpus123
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U perpus -d perpustakaan"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    container_name: perpustakaan-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/perpustakaan
+      SPRING_DATASOURCE_USERNAME: perpus
+      SPRING_DATASOURCE_PASSWORD: perpus123
+    ports:
+    - "8080:8080"
+
+volumes:
+  pgdata:
