@@ -103,9 +103,3 @@ src/main/java/com/vanxx/library
   exception    JSON error handling
 sql/seed.sql   sample data and the active-loan index
 ```
-
-## Ideas for next steps
-
-- Endpoints for members, categories, and authors, plus update and delete for books
-- Flyway migrations instead of `ddl-auto=update`
-- OpenAPI/Swagger documentation
