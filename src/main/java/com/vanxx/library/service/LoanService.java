@@ -73,11 +73,20 @@ public class LoanService {
         }
     }
 
-    @Transactional
+    @Transactional 
     public LoanResponse giveBack(Long id) {
+        return giveBack(id, null);
+    }
+
+    @Transactional
+    public LoanResponse giveBack(Long id, Long requesterMemberId) {
         Loan loan = loanRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Pinjaman tidak ditemukan: " + id));
+
+        if (requesterMemberId != null && !loan.getMember().getId().equals(requesterMemberId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Pinjaman ini bukan atas nama Anda");
+        }
 
         if (loan.getReturnDate() != null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,

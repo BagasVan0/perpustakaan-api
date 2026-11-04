@@ -26,6 +26,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/perpustakaan
       SPRING_DATASOURCE_USERNAME: perpus
       SPRING_DATASOURCE_PASSWORD: perpus123
+      JWT_SECRET: ${JWT_SECRET:? (fill JWT_SECRET on file .env)}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:? (fill ADMIN_PASSWORD on file .env)}
     ports:
     - "8080:8080"
 

@@ -32,6 +32,30 @@ erDiagram
 - A loan counts as `TELAT` (late) when it is past its due date and not yet returned.
 - Returning a book that was already returned is rejected.
 
+## Configuration
+
+The application requires the following environment variables (never commit them):
+
+| Variable | Purpose |
+|---|---|
+| `JWT_SECRET` | Key used to sign JWT tokens, at least 32 characters. Generate one with `openssl rand -base64 32` |
+| `ADMIN_PASSWORD` | Password for the admin account, created automatically on first startup |
+| `ADMIN_USERNAME` | (optional) Admin username, defaults to `admin` |
+
+### Running with Docker
+
+```bash
+# put JWT_SECRET and ADMIN_PASSWORD in a .env file first
+docker compose up -d --build
+```
+
+### Authentication
+
+- `POST /auth/register` creates a user and a member record (role: MEMBER)
+- `POST /auth/login` returns a JWT (valid for 1 hour)
+- Send the token in the `Authorization: Bearer <token>` header
+- Swagger UI: `/swagger-ui/index.html`, click **Authorize** and paste the token
+
 ## Run it
 
 Requirements: Docker with Docker Compose.
