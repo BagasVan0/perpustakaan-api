@@ -19,6 +19,9 @@ public class AppUser {
     @Column(nullable = false)
     private String role;
 
+    @Column(name = "member_id")
+    private Long memberId;
+
     protected AppUser() {}
 
     public AppUser(String username, String passwordHash, String role) {
@@ -27,6 +30,12 @@ public class AppUser {
         this.role = role;
     }
 
+    public AppUser(String username, String passwordHash, String role, Long memberId) {
+        this(username, passwordHash, role);
+        this.memberId = memberId;
+    }
+
+    public Long getMemberId() { return memberId; }
     public Long getId() { return id; }
     public String getUsername() { return username; }
     public String getPasswordHash() { return passwordHash; }
