@@ -6,4 +6,5 @@ import com.vanxx.library.entity.Member;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
     
+    boolean existsByEmail(String email);
 }
