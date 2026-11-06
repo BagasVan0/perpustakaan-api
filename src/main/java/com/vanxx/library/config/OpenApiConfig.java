@@ -14,7 +14,7 @@ public class OpenApiConfig {
     @Bean
     OpenAPI openAPI() {
         return new OpenAPI()
-            .info(new Info().title("Perpustakaan API").version("v1"))
+            .info(new Info().title("Perpustakaan API").version("v1").description("Perpustakaan management REST API: books, authors, categories, members, and loans. Protected endpoints require a JWT token from POST /auth/login."))
             .components(new Components().addSecuritySchemes("bearerAuth",
                 new SecurityScheme()
                     .type(SecurityScheme.Type.HTTP)
