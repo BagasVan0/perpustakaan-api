@@ -5,6 +5,9 @@ import com.vanxx.library.entity.AppUser;
 import com.vanxx.library.entity.Member;
 import com.vanxx.library.repository.AppUserRepository;
 import com.vanxx.library.repository.MemberRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -25,6 +28,7 @@ import java.time.temporal.ChronoUnit;
 
 @RestController 
 @RequestMapping("/auth")
+@Tag(name = "Auth", description = "Register an account and log in to obtain a JWT token")
 public class AuthController {
     
     public record RegisterRequest(String username, String password, String name, String email) {}
@@ -47,6 +51,10 @@ public class AuthController {
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     @Transactional
+    @Operation(summary = "Sign up a new account", description = "Create an account with the MEMBER role along with the member data. The password must be at least 8 characters long.")
+    @ApiResponse(responseCode = "201", description = "Account and member data created successfully")
+    @ApiResponse(responseCode = "400", description = "Missing required fields or password is too short")
+    @ApiResponse(responseCode = "Username or email is already taken")
     public RegisterResponse register(@RequestBody RegisterRequest req) {
         if (isBlank(req.username()) || isBlank(req.name()) || isBlank(req.email()) || req.password() == null || req.password().length() < 8) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username must be provided and password must be at least 8 characters long");
@@ -68,6 +76,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @Operation(summary = "Login", description = "Returns a JWT token valid for 1 hours. Paste the token into the Authorize button.")
+    @ApiResponse(responseCode = "200", description = "Login successful, token returned")
+    @ApiResponse(responseCode = "401", description = "Username or password wrong")
     public TokenResponse login(@RequestBody LoginRequest req) {
         AppUser user = users.findByUsername(req.username()).filter(u -> passwordEncoder.matches(req.password(), u.getPasswordHash())).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password"));
         Instant now = Instant.now();
