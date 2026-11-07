@@ -2,12 +2,15 @@ package com.vanxx.library.service;
 
 import com.vanxx.library.dto.BookRequest;
 import com.vanxx.library.dto.BookResponse;
+import com.vanxx.library.dto.PageResponse;
 import com.vanxx.library.entity.Author;
 import com.vanxx.library.entity.Book;
 import com.vanxx.library.entity.Category;
 import com.vanxx.library.repository.AuthorRepository;
 import com.vanxx.library.repository.BookRepository;
 import com.vanxx.library.repository.CategoryRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,29 +40,36 @@ public class BookService {
     }
 
     @Transactional(readOnly = true)
+    public PageResponse<BookResponse> search(String title, Long categoryId, Pageable pageable) {
+        String keyword = title == null ? "" : title.trim();
+        Page<Book> result = bookRepository.search(keyword, categoryId, pageable);
+        return PageResponse.from(result.map(this::toResponse));
+    }
+
+    @Transactional(readOnly = true)
     public BookResponse findById(Long id) {
         return bookRepository.findById(id)
                 .map(this::toResponse)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Buku tidak ditemukan: " + id));
+                        HttpStatus.NOT_FOUND, "Book not found: " + id));
     }
 
     @Transactional
     public BookResponse create(BookRequest request) {
         if (request.title() == null || request.title().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Judul wajib diisi");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Title is required");
         }
         if (request.categoryId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "categoryId wajib diisi");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "categoryId is required");
         }
         if (request.isbn() != null && bookRepository.existsByIsbn(request.isbn())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "ISBN sudah terdaftar: " + request.isbn());
+                    "ISBN already exists: " + request.isbn());
         }
 
         Category category = categoryRepository.findById(request.categoryId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Kategori tidak ditemukan: " + request.categoryId()));
+                        "Category not found: " + request.categoryId()));
 
         Book book = new Book();
         book.setTitle(request.title());
@@ -71,7 +81,7 @@ public class BookService {
             List<Author> authors = authorRepository.findAllById(request.authorIds());
             if (authors.size() != new HashSet<>(request.authorIds()).size()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Ada authorId yang tidak ditemukan");
+                        "One or more authorIds not found");
             }
             book.getAuthors().addAll(authors);
         }

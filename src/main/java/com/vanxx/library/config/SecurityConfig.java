@@ -40,6 +40,7 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/books", "/books/**").permitAll()
                 .requestMatchers("/auth/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/books").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/loans", "/loans/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/loans").hasAnyRole("MEMBER", "ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/loans/*/return").hasAnyRole("MEMBER", "ADMIN")

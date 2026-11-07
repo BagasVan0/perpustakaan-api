@@ -44,19 +44,19 @@ public class LoanService {
     public LoanResponse borrow(LoanRequest request) {
         if (request.memberId() == null || request.bookId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "memberId dan bookId wajib diisi");
+                    "memberId and bookId are required");
         }
 
         Member member = memberRepository.findById(request.memberId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Member tidak ditemukan: " + request.memberId()));
+                        "Member not found: " + request.memberId()));
         Book book = bookRepository.findById(request.bookId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Buku tidak ditemukan: " + request.bookId()));
+                        "Book not found: " + request.bookId()));
 
         if (loanRepository.existsByBookIdAndReturnDateIsNull(book.getId())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Buku sedang dipinjam: " + book.getTitle());
+                    "Buku is already on loan: " + book.getTitle());
         }
 
         Loan loan = new Loan();
@@ -69,7 +69,7 @@ public class LoanService {
             return toResponse(loanRepository.saveAndFlush(loan));
         } catch (DataIntegrityViolationException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Buku sedang dipinjam: " + book.getTitle());
+                    "Book is already on loan: " + book.getTitle());
         }
     }
 
@@ -82,7 +82,7 @@ public class LoanService {
     public LoanResponse giveBack(Long id, Long requesterMemberId) {
         Loan loan = loanRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Pinjaman tidak ditemukan: " + id));
+                        "Loan not found: " + id));
 
         if (requesterMemberId != null && !loan.getMember().getId().equals(requesterMemberId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Pinjaman ini bukan atas nama Anda");
@@ -90,7 +90,7 @@ public class LoanService {
 
         if (loan.getReturnDate() != null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Buku sudah dikembalikan");
+                    "Buku has already been returned");
         }
 
         loan.setReturnDate(LocalDate.now());
@@ -100,11 +100,11 @@ public class LoanService {
     private LoanResponse toResponse(Loan loan) {
         String status;
         if (loan.getReturnDate() != null) {
-            status = "kembali";
+            status = "Returned";
         } else if (loan.getDueDate().isBefore(LocalDate.now())) {
-            status = "TELAT";
+            status = "OVERDUE";
         } else {
-            status = "dipinjam";
+            status = "On loan";
         }
         return new LoanResponse(
                 loan.getId(),
