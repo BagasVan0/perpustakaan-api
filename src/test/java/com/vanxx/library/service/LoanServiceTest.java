@@ -83,7 +83,7 @@ class LoanServiceTest {
 
         LoanResponse result = loanService.borrow(new LoanRequest(2L, 5L));
 
-        assertEquals("dipinjam", result.status());
+        assertEquals("On loan", result.status());
         assertEquals("Sari Dewi", result.member());
         assertEquals("Clean Code", result.book());
         assertEquals(LocalDate.now().plusDays(14), result.dueDate());
@@ -127,7 +127,7 @@ class LoanServiceTest {
 
         LoanResponse result = loanService.giveBack(1L);
 
-        assertEquals("kembali", result.status());
+        assertEquals("Returned", result.status());
         assertEquals(LocalDate.now(), result.returnDate());
     }
 
@@ -154,6 +154,6 @@ class LoanServiceTest {
         List<LoanResponse> result = loanService.findAll();
 
         assertEquals(1, result.size());
-        assertEquals("TELAT", result.get(0).status());
+        assertEquals("OVERDUE", result.get(0).status());
     }
 }
